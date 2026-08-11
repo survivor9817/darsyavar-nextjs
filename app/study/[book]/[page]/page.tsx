@@ -1,17 +1,17 @@
-"use client";
-
 type Props = {
   params: Promise<{
-    bookId: string;
+    book: string;
+    page: string;
   }>;
 };
 
 const page = async ({ params }: Props) => {
-  const { bookId } = await params;
+  const { book, page } = await params;
   return (
     <div>
       <div>page</div>
-      <div>{bookId}</div>
+      <div>{book}</div>
+      <div>{page}</div>
     </div>
   );
 };

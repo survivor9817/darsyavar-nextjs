@@ -1,5 +1,3 @@
-"use client";
-
 type Props = {
   params: Promise<{
     bookId: string;

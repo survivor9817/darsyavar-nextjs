@@ -46,7 +46,7 @@ export default function RootLayout({
         materialSymbols.variable,
       )}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
