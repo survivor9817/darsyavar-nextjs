@@ -1,6 +1,7 @@
 import ArrowGif from "@/public/imgs/Arrow down icon animation.gif";
 import LandingNavbar from "@/components/landing-navbar";
 import Image from "next/image";
+import HeroTypeWriter from "@/components/hero-typewriter";
 
 const LandingPage = () => {
   return (
@@ -8,7 +9,7 @@ const LandingPage = () => {
       <div className="min-w-75 max-w-4xl w-200">
         <LandingNavbar />
 
-        {/* <HeroTypeWriter /> */}
+        <HeroTypeWriter />
 
         <div className="flex justify-center">
           <Image src={ArrowGif} alt="" className="size-20 sm:size-26" />

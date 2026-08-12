@@ -1,0 +1,25 @@
+"use client";
+// src/components/HeroTypeWriter.tsx
+import { TypingAnimation } from "./ui/typing-animation";
+
+const HeroTypeWriter = () => {
+  return (
+    <div className="pt-14 pb-8 text-2xl md:text-3xl lg:text-4xl font-bold text-center">
+      <div className="mb-4 text-gray-800 ">با درس‌یاور،</div>
+
+      <div className="">
+        <span>از</span>
+
+        <TypingAnimation
+          words={["کتاب تست", "معلم خصوصی", "مشاور تحصیلی", "کتاب کاغذی", "ویدیوی آموزشی"]}
+          loop
+          className="text-blue-600 dark:text-blue-400 mr-2"
+        />
+
+        <span>بی‌نیازی!</span>
+      </div>
+    </div>
+  );
+};
+
+export default HeroTypeWriter;
