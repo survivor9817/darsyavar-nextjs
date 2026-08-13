@@ -1,19 +1,7 @@
 "use client";
-import { useChooseBook } from "@/hooks/useChooseBook";
 import AuthInModal from "./auth-in-modal";
-import BookShelf from "./book-shelf";
 
 const LandingNavbar = () => {
-  const {
-    grades,
-    fields,
-    selectedGrade,
-    setSelectedGrade,
-    selectedField,
-    setSelectedField,
-    filteredBooks,
-  } = useChooseBook();
-
   return (
     <>
       <div
@@ -31,7 +19,6 @@ const LandingNavbar = () => {
           <AuthInModal />
         </div>
       </div>
-      <BookShelf books={filteredBooks} />
     </>
   );
 };

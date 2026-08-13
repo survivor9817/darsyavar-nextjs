@@ -2,6 +2,7 @@ import ArrowGif from "@/public/imgs/Arrow down icon animation.gif";
 import LandingNavbar from "@/components/landing-navbar";
 import Image from "next/image";
 import HeroTypeWriter from "@/components/hero-typewriter";
+import ChooseBook from "@/components/choose-book";
 
 const LandingPage = () => {
   return (
@@ -16,7 +17,7 @@ const LandingPage = () => {
           <Image src={ArrowGif} alt="" className="size-20 sm:size-26" />
           <Image src={ArrowGif} alt="" className="size-20 sm:size-26" />
         </div>
-        {/* <ChooseBook /> */}
+        <ChooseBook />
         {/* <ChooseBook2 /> */}
       </div>
     </div>

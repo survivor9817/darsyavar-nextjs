@@ -1,9 +1,8 @@
-import Select, { type StylesConfig } from "react-select";
-import BookSlider from "./BookSlider";
-import BookCard from "./BookCard";
-import GradeBtn from "./GradeBtn";
-import type { Field } from "../data/booksData";
+"use client";
 import { useChooseBook } from "@/hooks/useChooseBook";
+import FieldSelect from "./field-select";
+import BookShelf from "./book-shelf";
+import { Button } from "./ui/button";
 
 const ChooseBook = () => {
   const {
@@ -16,67 +15,37 @@ const ChooseBook = () => {
     filteredBooks,
   } = useChooseBook();
 
-  const selectCustomStyles: StylesConfig = {
-    control: (provider) => ({
-      ...provider,
-      direction: "ltr",
-      flexDirection: "row-reverse",
-      textAlign: "center",
-      width: "110px",
-      borderRadius: "12px",
-      height: "40px",
-    }),
-    indicatorsContainer: (provider) => ({
-      ...provider,
-      direction: "rtl",
-    }),
-  };
-
   return (
-    <>
+    <div className="mb-6">
       <div className="flex flex-col items-center justify-center mt-8">
         <p className="text-lg md:text-xl lg:text-2xl">کتابت رو بردار و خواندن رو شروع کن</p>
 
         <div className="grid grid-cols-3 flex-wrap justify-center gap-2 w-75 sm:w-90 md:w-110 my-4 ">
           {grades.map((grade) => (
-            <GradeBtn
+            <Button
               key={grade.id}
-              isActive={selectedGrade.label === grade.label}
+              variant={selectedGrade.label === grade.label ? "default" : "outline"}
               onClick={() => setSelectedGrade(grade)}
             >
               {grade.label}
-            </GradeBtn>
+            </Button>
           ))}
         </div>
       </div>
 
-      <div className="flex gap-2 mt-6 mx-4">
+      <div className="flex gap-2 my-2 mx-4">
         <span className="text-xl py-1">کتابخانه پایه {selectedGrade.label}</span>
         {selectedGrade.dore === "متوسطه دوم" ? (
-          <Select
-            styles={selectCustomStyles}
-            className="basic-single "
-            classNamePrefix="select"
-            defaultValue={fields[0]}
-            value={selectedField}
-            isSearchable={false}
-            options={fields}
-            onChange={(field) => setSelectedField(field as Field)}
+          <FieldSelect
+            fields={fields}
+            selectedField={selectedField}
+            setSelectedField={setSelectedField}
           />
         ) : null}
       </div>
 
-      <BookSlider>
-        {filteredBooks.map((book) => (
-          <BookCard
-            key={book.id}
-            title={book.label}
-            coverImage={book.coverImage}
-            isAvailable={book.isAvailable}
-          />
-        ))}
-      </BookSlider>
-    </>
+      <BookShelf books={filteredBooks} />
+    </div>
   );
 };
 
