@@ -1,5 +1,5 @@
 "use client";
-import AuthInModal from "./auth-in-modal";
+import AuthModalBtn from "./auth-modal-btn";
 
 const LandingNavbar = () => {
   return (
@@ -15,8 +15,8 @@ const LandingNavbar = () => {
             <div className="text-2xl my-1 px-2 rounded-3xl border-[#bcbcbc] ">درس‌یاور</div>
           </a>
         </div>
-        <div className="flex gap-4 mx-1">
-          <AuthInModal />
+        <div className="flex items-center gap-4 mx-1">
+          <AuthModalBtn />
         </div>
       </div>
     </>

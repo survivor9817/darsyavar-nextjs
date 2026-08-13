@@ -16,7 +16,7 @@ type BookInfo = {
 
 const BookCard = ({ coverImage, isAvailable, title }: BookInfo) => {
   return (
-    <Card className="py-0 gap-0">
+    <Card className="py-0 gap-0 transition-transform hover:scale-105 active:scale-95">
       <CardContent className="p-0">
         <img src={coverImage} alt={title} />
       </CardContent>

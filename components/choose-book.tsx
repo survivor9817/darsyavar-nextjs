@@ -24,7 +24,9 @@ const ChooseBook = () => {
           {grades.map((grade) => (
             <Button
               key={grade.id}
-              variant={selectedGrade.label === grade.label ? "default" : "outline"}
+              variant={selectedGrade.label === grade.label ? "default" : "secondary"}
+              // variant={selectedGrade.label === grade.label ? "default" : "secondary"}
+              className={"h-10"}
               onClick={() => setSelectedGrade(grade)}
             >
               {grade.label}

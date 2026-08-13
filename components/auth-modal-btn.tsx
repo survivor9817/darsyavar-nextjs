@@ -7,19 +7,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import LoginField from "./login-field";
+import { Button } from "./ui/button";
 type Props = {};
 
-const AuthInModal = (props: Props) => {
+const AuthModalBtn = (props: Props) => {
   return (
     <Dialog>
       <DialogTrigger
         render={
-          <button
-            className="border-2 my-1 px-4 rounded-3xl border-[#bcbcbc] hover:bg-[#ddd] 
-              transition-colors duration-100 ease-in-out active:scale-[0.95] text-sm"
+          <Button
+            variant={"ghost"}
+            className="h-11 border-2 border-[#bcbcbc] hover:bg-[#ddd] px-4 transition-colors duration-200 ease-in-out text-sm"
           >
             ورود / ثبت‌نام
-          </button>
+          </Button>
         }
       />
 
@@ -34,4 +35,4 @@ const AuthInModal = (props: Props) => {
   );
 };
 
-export default AuthInModal;
+export default AuthModalBtn;
