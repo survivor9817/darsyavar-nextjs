@@ -1,6 +1,6 @@
 "use client";
 // src/components/HeroTypeWriter.tsx
-import { TypingAnimation } from "./ui/typing-animation";
+import { TypingAnimation } from "../ui/typing-animation";
 
 const HeroTypeWriter = () => {
   return (

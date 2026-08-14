@@ -1,8 +1,8 @@
 "use client";
 import { useChooseBook } from "@/hooks/useChooseBook";
-import FieldSelect from "./field-select";
 import BookShelf from "./book-shelf";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
+import FieldSelect from "./field-select";
 
 const ChooseBook = () => {
   const {

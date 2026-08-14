@@ -1,3 +1,5 @@
+import StudyTabs from "./study-tabs";
+
 type Props = {
   params: Promise<{
     book: string;
@@ -5,15 +7,13 @@ type Props = {
   }>;
 };
 
-const page = async ({ params }: Props) => {
+const StudyPage = async ({ params }: Props) => {
   const { book, page } = await params;
   return (
-    <div>
-      <div>page</div>
-      <div>{book}</div>
-      <div>{page}</div>
-    </div>
+    <>
+      <StudyTabs />
+    </>
   );
 };
 
-export default page;
+export default StudyPage;

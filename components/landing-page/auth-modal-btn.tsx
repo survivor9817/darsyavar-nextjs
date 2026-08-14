@@ -6,8 +6,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "../ui/button";
 import LoginField from "./login-field";
-import { Button } from "./ui/button";
 type Props = {};
 
 const AuthModalBtn = (props: Props) => {

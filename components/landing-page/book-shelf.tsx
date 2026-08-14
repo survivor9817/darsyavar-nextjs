@@ -37,9 +37,9 @@ const BookShelf = ({ books }: Props) => {
       }}
     >
       <CarouselContent className="px-2 gap-5">
-        {books.map(({ coverImage, isAvailable, label }, index) => (
+        {books.map(({ id, coverImage, isAvailable, label }, index) => (
           <CarouselItem key={index} className="h-full my-2 basis-[43%] sm:basis-[22%]">
-            <Link href="">
+            <Link href={`/study/${id}/${1}`}>
               <BookCard coverImage={coverImage} isAvailable={isAvailable} title={label} />
             </Link>
           </CarouselItem>
