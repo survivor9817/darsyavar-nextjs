@@ -77,10 +77,10 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
       >
         <label
           className={cn(
-            "pointer-events-none absolute right-3 z-10 origin-right px-1 transition-all duration-200 ease-out",
-            "bg-[#ebebeb] font-bold text-[#1a73e8]",
+            "pointer-events-none absolute right-5 z-10 origin-right px-2 transition-all duration-200 ease-out",
+            "bg-[#ebebeb] font-bold",
             isFloating
-              ? "-top-2.5 text-xs scale-90"
+              ? "-top-2 text-xs scale-90 bg-background"
               : "top-1/2 -translate-y-1/2 text-base scale-100",
           )}
         >
@@ -95,9 +95,9 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
             if (!open) setOpen(true);
             setInputValue(e.target.value);
           }}
-          placeholder=""
+          placeholder="کتابی که می‌خوای رو انتخاب کن."
           className={cn(
-            "h-11.5 w-full rounded-lg border-2 border-[rgb(200,200,200)] bg-[#ebebeb]",
+            "h-11.5 w-full border-2 border-[rgb(200,200,200)] bg-background",
             "px-3 text-center text-base font-black cursor-pointer",
             "focus-visible:ring-0 focus-visible:ring-offset-0",
           )}
