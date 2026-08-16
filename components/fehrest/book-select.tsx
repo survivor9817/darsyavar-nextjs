@@ -1,101 +1,153 @@
 "use client";
-import { useState, useEffect, useMemo, ChangeEvent, useRef } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
-import { useBookParams } from "@/hooks/use-study-params";
+
+import * as React from "react";
+import { useRef, useMemo, useEffect, useState, ChangeEvent } from "react";
+import { Combobox } from "@base-ui/react/combobox";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { BookOption } from "@/data/booksData";
+import { cn } from "@/lib/utils";
+import { useBookParams } from "@/hooks/use-study-params";
 import { useBookContext } from "@/app/providers/book-provider";
-import { BaseUIEvent } from "@base-ui/react";
+import type { BookOption } from "@/data/booksData";
 
 type BookSelectProps = {
   className?: string;
   label?: string;
+  dir?: "rtl" | "ltr";
 };
 
-const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProps) => {
+export default function BookSelect({
+  className,
+  label = "فهرست کتاب",
+  dir = "rtl",
+}: BookSelectProps) {
   const { books, selectedBook } = useBookContext();
   const searchParams = useSearchParams();
   const { bookId } = useBookParams();
+  const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const comboboxInputValue = open ? inputValue : (selectedBook?.label ?? "");
+  const [localValue, setLocalValue] = useState<BookOption | null>(selectedBook);
 
-  const hasValue = Boolean(selectedBook);
+  const comboboxInputValue = open ? inputValue : (localValue?.label ?? "");
+
+  const hasValue = Boolean(localValue);
   const isFloating = hasValue || open || inputValue.length > 0;
+  const isRtl = dir === "rtl";
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Sync localValue with context when it changes externally
+  useEffect(() => {
+    setLocalValue(selectedBook);
+  }, [selectedBook]);
 
   useEffect(() => {
     if (open) {
-      setInputValue(selectedBook?.label ?? "");
+      setInputValue(localValue?.label ?? "");
     }
-  }, [open, selectedBook?.label]);
+  }, [open, localValue?.label]);
+
+  // Select text when opened
+  useEffect(() => {
+    if (!inputRef.current || !open) return;
+    const raf = requestAnimationFrame(() => {
+      inputRef.current?.select();
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [open]);
 
   const filteredBooks = useMemo(() => {
     if (!books) return [];
-    if (!inputValue || inputValue === selectedBook?.label) {
+    if (!inputValue || inputValue === localValue?.label) {
       return books;
     }
     const lowerQuery = inputValue.toLowerCase();
     return books.filter((book) => book.label.toLowerCase().includes(lowerQuery));
-  }, [books, inputValue, selectedBook?.label]);
+  }, [books, inputValue, localValue?.label]);
 
-  const onInputChange = (e: BaseUIEvent<ChangeEvent<HTMLInputElement, HTMLInputElement>>) => {
+  const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!open) setOpen(true);
     setInputValue(e.target.value);
   };
 
-  const router = useRouter();
   const changeBook = (newBookId: string) => {
     const query = searchParams.toString();
     router.push(`/study/${newBookId}/1${query ? `?${query}` : ""}`);
   };
 
-  const handleSelect = (newSelectedBook: BookOption | null) => {
-    if (!newSelectedBook) return;
-    const newBookId = newSelectedBook.value;
-    if (newBookId !== bookId) changeBook(newBookId);
+  const handleValueChange = (next: BookOption | BookOption[] | null) => {
+    const selected = Array.isArray(next) ? next[0] : next;
+
+    // اول state محلی را به‌روز کن (سریع)
+    setLocalValue(selected);
+
+    // بعد navigation را انجام بده
+    if (selected && selected.value !== bookId) {
+      changeBook(selected.value);
+    }
+
     setOpen(false);
+    setInputValue("");
   };
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (!inputRef.current) return;
-    if (open) {
-      const raf1 = requestAnimationFrame(() => {
-        inputRef.current?.select();
-      });
-      return () => cancelAnimationFrame(raf1);
-    }
-  }, [open]);
+  // const handleTriggerClick = () => {
+  //   setOpen(!open);
+  //   inputRef.current?.focus();
+  // };
 
-  // useEffect(() => {
-  //   if (!inputRef.current) return;
-  //   if (open) {
-  //     const raf1 = requestAnimationFrame(() => {
-  //       const raf2 = requestAnimationFrame(() => {
-  //         inputRef.current?.select();
-  //       });
-  //       return () => cancelAnimationFrame(raf2);
-  //     });
-  //     return () => cancelAnimationFrame(raf1);
-  //   }
-  // }, [open]);
-
-  // useEffect(() => {
-  //   setInputValue(open ? inputValue : (selectedBook?.label ?? ""));
-  // }, [open, selectedBook?.label]);
+  const ui = {
+    wrapper: cn("relative mt-10 cursor-pointer w-full max-w-75", className),
+    label: cn(
+      "pointer-events-none absolute z-10 px-2 transition-all duration-200 ease-out",
+      "bg-[#ebebeb] font-bold",
+      isRtl ? "right-5 origin-right" : "left-5 origin-left",
+      isFloating
+        ? "-top-2 text-xs scale-90 bg-background"
+        : "top-1/2 -translate-y-1/2 text-base scale-100",
+    ),
+    inputGroup: cn(
+      "relative flex items-center",
+      "h-[2.875rem] w-full border-2 border-[rgb(200,200,200)] bg-background",
+    ),
+    input: cn(
+      "flex-1 px-3 text-center text-base font-black cursor-pointer w-full ",
+      "focus:outline-none",
+      isRtl ? "pr-3 pl-10" : "pl-3 pr-10",
+    ),
+    trigger: cn(
+      "flex items-center justify-center",
+      "w-10 h-full",
+      "border-0 bg-transparent cursor-pointer",
+      "text-gray-600 hover:text-gray-900",
+      "dark:text-gray-400 dark:hover:text-white",
+    ),
+    content: cn(
+      "w-(--anchor-width) border border-[rgb(200,200,200)] bg-white shadow-lg",
+      "dark:border-white dark:bg-[oklch(14.5%_0_0deg)] dark:text-white",
+      "transition-[opacity,transform,scale] duration-100",
+      "data-[starting-style]:opacity-0 data-[starting-style]:[transform:scale(0.95)]",
+      "data-[ending-style]:opacity-0 data-[ending-style]:[transform:scale(0.95)]",
+    ),
+    list: cn(
+      "max-h-[min(22.5rem,var(--available-height))]",
+      "overflow-y-auto overscroll-contain py-1",
+      "[outline:0]",
+    ),
+    item: cn(
+      "cursor-pointer px-3 py-2 text-center text-base font-bold",
+      "[outline:0]",
+      "data-[highlighted]:bg-[oklch(14.5%_0_0deg)] data-[highlighted]:text-white",
+      "dark:data-[highlighted]:bg-white dark:data-[highlighted]:text-[oklch(14.5%_0_0deg)]",
+    ),
+    empty: cn("p-2 text-center text-sm font-bold text-gray-500"),
+  };
 
   return (
     <div
-      className={cn("relative mt-10", className)}
+      className={ui.wrapper}
+      dir={dir}
       onMouseDown={(e) => {
         const target = e.target as HTMLElement;
         if (target.tagName !== "INPUT" && inputRef.current) {
@@ -105,63 +157,71 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
         }
       }}
     >
-      <Combobox
+      <Combobox.Root
         items={filteredBooks}
-        value={selectedBook}
-        isItemEqualToValue={(item, value) => item?.value === value?.value}
+        value={localValue}
         open={open}
-        // onOpenChange={setOpen}
         onOpenChange={setOpen}
-        onValueChange={handleSelect}
+        onValueChange={handleValueChange}
         autoHighlight
       >
-        <label
-          className={cn(
-            "pointer-events-none absolute right-5 z-10 origin-right px-2 transition-all duration-200 ease-out",
-            "bg-[#ebebeb] font-bold",
-            isFloating
-              ? "-top-2 text-xs scale-90 bg-background"
-              : "top-1/2 -translate-y-1/2 text-base scale-100",
-          )}
-        >
+        <label htmlFor="book-select-input" className={ui.label}>
           {label}
         </label>
 
-        <ComboboxInput
-          ref={inputRef}
-          // value={inputValue}
-          value={comboboxInputValue}
-          // onFocus={(e) => selectAllText(e.target)}
-          // onClick={(e) => selectAllText(e.target as HTMLInputElement)}
-          onChange={onInputChange}
-          placeholder="کتابی که می‌خوای رو انتخاب کن."
-          className={cn(
-            "h-11.5 w-full border-2 border-[rgb(200,200,200)] bg-background",
-            "px-3 text-center text-base font-black cursor-pointer",
-            "focus-visible:ring-0 focus-visible:ring-offset-0",
-          )}
-        />
+        <Combobox.InputGroup className={ui.inputGroup}>
+          <Combobox.Input
+            ref={inputRef}
+            id="book-select-input"
+            value={comboboxInputValue}
+            onChange={onInputChange}
+            placeholder="کتابی که می‌خوای رو انتخاب کن."
+            className={ui.input}
+          />
 
-        <ComboboxContent className="w-(--anchor-width) p-0" dir="rtl">
-          <ComboboxList>
-            <ComboboxEmpty className="p-2 text-center text-sm font-bold text-gray-500">
-              {inputValue ? `هیچ کتابی با "${inputValue}" پیدا نشد` : "کتابی موجود نیست"}
-            </ComboboxEmpty>
+          <Combobox.Trigger
+            ref={triggerRef}
+            className={ui.trigger}
+            // onClick={handleTriggerClick}
+            aria-label="Open popup"
+          >
+            <CaretDownIcon className={cn("transition-transform", open && "rotate-180")} />
+          </Combobox.Trigger>
+        </Combobox.InputGroup>
 
-            {filteredBooks.map((book) => (
-              <ComboboxItem
-                key={book.value}
-                value={book}
-                className="justify-center font-bold cursor-pointer"
-              >
-                {book.label}
-              </ComboboxItem>
-            ))}
-          </ComboboxList>
-        </ComboboxContent>
-      </Combobox>
+        <Combobox.Portal>
+          <Combobox.Positioner sideOffset={4}>
+            <Combobox.Popup className={ui.content}>
+              <Combobox.Empty className={ui.empty}>
+                {inputValue ? `هیچ کتابی با "${inputValue}" پیدا نشد` : "کتابی موجود نیست"}
+              </Combobox.Empty>
+
+              <Combobox.List className={ui.list}>
+                {filteredBooks.map((book) => (
+                  <Combobox.Item key={book.value} value={book} className={ui.item}>
+                    {book.label}
+                  </Combobox.Item>
+                ))}
+              </Combobox.List>
+            </Combobox.Popup>
+          </Combobox.Positioner>
+        </Combobox.Portal>
+      </Combobox.Root>
     </div>
   );
-};
+}
 
-export default BookSelect;
+function CaretDownIcon(props: React.ComponentProps<"svg">) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      {...props}
+      style={{ display: "block", ...props.style }}
+    >
+      <path d="M12 6H4l4 4.5z" />
+    </svg>
+  );
+}
