@@ -14,6 +14,7 @@ import { useBookParams } from "@/hooks/use-study-params";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { BookOption } from "@/data/booksData";
 import { useBookContext } from "@/app/providers/book-provider";
+import { BaseUIEvent } from "@base-ui/react";
 
 type BookSelectProps = {
   className?: string;
@@ -22,7 +23,6 @@ type BookSelectProps = {
 
 const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProps) => {
   const { books, selectedBook } = useBookContext();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { bookId } = useBookParams();
 
@@ -44,33 +44,63 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
     return books.filter((book) => book.label.toLowerCase().includes(lowerQuery));
   }, [books, inputValue, selectedBook?.label]);
 
-  const selectAllText = (inputElement: HTMLInputElement) => {
-    setTimeout(() => {
-      inputElement.select();
-    }, 50);
+  const onInputChange = (e: BaseUIEvent<React.ChangeEvent<HTMLInputElement, HTMLInputElement>>) => {
+    if (!open) setOpen(true);
+    setInputValue(e.target.value);
   };
 
-  const handleSelect = (value: BookOption | null) => {
-    if (!value) return;
+  const router = useRouter();
+  const changeBook = (newBookId: string) => {
+    const query = searchParams.toString();
+    router.push(`/study/${newBookId}/1${query ? `?${query}` : ""}`);
+  };
 
-    if (value.value !== bookId) {
-      const tab = searchParams.get("tab") ?? "book";
-      router.push(`/study/${value.value}/1?tab=${tab}`);
-    }
-
+  const handleSelect = (newSelectedBook: BookOption | null) => {
+    if (!newSelectedBook) return;
+    const newBookId = newSelectedBook.value;
+    if (newBookId !== bookId) changeBook(newBookId);
     setOpen(false);
   };
+
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  React.useEffect(() => {
+    if (!inputRef.current) return;
+    if (open) {
+      const raf1 = requestAnimationFrame(() => {
+        inputRef.current?.select();
+      });
+      return () => cancelAnimationFrame(raf1);
+    }
+  }, [open]);
+
+  // React.useEffect(() => {
+  //   if (!inputRef.current) return;
+  //   if (open) {
+  //     const raf1 = requestAnimationFrame(() => {
+  //       const raf2 = requestAnimationFrame(() => {
+  //         inputRef.current?.select();
+  //       });
+  //       return () => cancelAnimationFrame(raf2);
+  //     });
+  //     return () => cancelAnimationFrame(raf1);
+  //   }
+  // }, [open]);
+
+  // React.useEffect(() => {
+  //   setInputValue(open ? inputValue : (selectedBook?.label ?? ""));
+  // }, [open, selectedBook?.label]);
 
   const hasValue = Boolean(selectedBook);
   const isFloating = hasValue || open || inputValue.length > 0;
 
   return (
-    <div className={cn("relative mt-10 w-73", className)}>
+    <div className={cn("relative mt-10", className)}>
       <Combobox
         items={filteredBooks}
-        value={selectedBook} // 👈 اضافه شد: تنظیم مقدار انتخاب‌شده برای تشخیص تیک
-        isItemEqualToValue={(item, value) => item?.value === value?.value} // ← به‌جای by
+        value={selectedBook}
+        isItemEqualToValue={(item, value) => item?.value === value?.value}
         open={open}
+        // onOpenChange={setOpen}
         onOpenChange={setOpen}
         onValueChange={handleSelect}
         autoHighlight
@@ -88,13 +118,12 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
         </label>
 
         <ComboboxInput
+          ref={inputRef}
+          // value={inputValue}
           value={open ? inputValue : (selectedBook?.label ?? "")}
-          onFocus={(e) => selectAllText(e.target)}
-          onClick={(e) => selectAllText(e.target as HTMLInputElement)}
-          onChange={(e) => {
-            if (!open) setOpen(true);
-            setInputValue(e.target.value);
-          }}
+          // onFocus={(e) => selectAllText(e.target)}
+          // onClick={(e) => selectAllText(e.target as HTMLInputElement)}
+          onChange={onInputChange}
           placeholder="کتابی که می‌خوای رو انتخاب کن."
           className={cn(
             "h-11.5 w-full border-2 border-[rgb(200,200,200)] bg-background",
