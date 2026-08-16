@@ -21,19 +21,3 @@ export function usePageNavigation() {
 
   return { bookId, page, book, goToPage, goToNextPage, goToPrevPage, isPageInRange };
 }
-
-// // داخل خودِ کامپوننت page-input.tsx
-// "use client";
-// import { useState, useRef } from "react";
-// import { toFaDigits, toEnDigits } from "@/lib/digits";
-// import { usePageNavigation } from "@/hooks/use-page-navigation";
-
-// export function PageInput() {
-//   const { page, goToPage, isPageInRange } = usePageNavigation();
-//   const [pageInput, setPageInput] = useState(toFaDigits(page));
-//   const [pageInputError, setPageInputError] = useState(false);
-//   const onFocusPageNumber = useRef(page);
-
-//   // بقیه‌ی منطق (onFocus, onBlur, onInputKeyDown) دقیقاً همون قبلیه،
-//   // فقط setCurrentPage قبلی رو با goToPage جایگزین کنید
-// }

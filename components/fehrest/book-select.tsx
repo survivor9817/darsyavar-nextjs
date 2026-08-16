@@ -19,10 +19,9 @@ import { BaseUIEvent } from "@base-ui/react";
 type BookSelectProps = {
   className?: string;
   label?: string;
-  dir?: "rtl" | "ltr";
 };
 
-const BookSelect = ({ className, label = "فهرست کتاب", dir = "rtl" }: BookSelectProps) => {
+const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProps) => {
   const { books, selectedBook } = useBookContext();
   const searchParams = useSearchParams();
   const { bookId } = useBookParams();
@@ -96,7 +95,6 @@ const BookSelect = ({ className, label = "فهرست کتاب", dir = "rtl" }: B
   return (
     <div
       className={cn("relative mt-10 ", className)}
-      dir={dir}
       onMouseDown={(e) => {
         const target = e.target as HTMLElement;
         // اگر روی input یا trigger کلیک شده، کاری نکن
@@ -143,7 +141,7 @@ const BookSelect = ({ className, label = "فهرست کتاب", dir = "rtl" }: B
           )}
         />
 
-        <ComboboxContent className="w-(--anchor-width) p-0" dir={dir}>
+        <ComboboxContent className="w-(--anchor-width) p-0">
           <ComboboxList>
             <ComboboxEmpty className="p-2 text-center text-sm font-bold text-gray-500">
               {inputValue ? `هیچ کتابی با "${inputValue}" پیدا نشد` : "کتابی موجود نیست"}
