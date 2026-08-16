@@ -15,7 +15,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { BookOption } from "@/data/booksData";
 import { useBookContext } from "@/app/providers/book-provider";
 import { BaseUIEvent } from "@base-ui/react";
-import { ChevronDown } from "lucide-react";
 
 type BookSelectProps = {
   className?: string;
@@ -36,7 +35,6 @@ const BookSelect = ({ className, label = "فهرست کتاب", dir = "rtl" }: B
 
   const hasValue = Boolean(localValue);
   const isFloating = hasValue || open || inputValue.length > 0;
-  const isRtl = dir === "rtl";
 
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -95,11 +93,6 @@ const BookSelect = ({ className, label = "فهرست کتاب", dir = "rtl" }: B
     setInputValue("");
   };
 
-  const handleTriggerClick = () => {
-    setOpen((prev) => !prev);
-    inputRef.current?.focus();
-  };
-
   return (
     <div
       className={cn("relative mt-10 ", className)}
@@ -130,7 +123,6 @@ const BookSelect = ({ className, label = "فهرست کتاب", dir = "rtl" }: B
           className={cn(
             "pointer-events-none absolute z-10 px-2 transition-all duration-200 ease-out",
             "bg-[#ebebeb] font-bold",
-            isRtl ? "right-5 origin-right" : "left-5 origin-left",
             isFloating
               ? "-top-2 text-xs scale-90 bg-background"
               : "top-1/2 -translate-y-1/2 text-base scale-100",
