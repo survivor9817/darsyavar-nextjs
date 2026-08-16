@@ -1,12 +1,12 @@
 // hooks/use-page-navigation.ts
 "use client";
 import { useRouter } from "next/navigation";
-import { useStudyParams } from "./use-study-params";
+import { useBookParams } from "./use-study-params";
 import { useBookQuery } from "./use-book-query";
 
 export function usePageNavigation() {
   const router = useRouter();
-  const { bookId, page } = useStudyParams();
+  const { bookId, page } = useBookParams();
   const { data: book } = useBookQuery(bookId);
 
   const isPageInRange = (p: number) => Number.isInteger(p) && p >= 1 && p <= (book?.lastPage ?? 1);

@@ -2,10 +2,12 @@
 "use client";
 import { useParams } from "next/navigation";
 
-export function useStudyParams() {
-  const params = useParams<{ bookId: string; page: string }>();
-  return {
-    bookId: params.bookId,
-    page: Number(params.page),
-  };
+type BookParams = {
+  book: string;
+  page: string;
+};
+
+export function useBookParams() {
+  const params = useParams<BookParams>();
+  return { bookId: params.book, page: params.page }; // ← از params.book می‌خونه، نه params.bookId
 }

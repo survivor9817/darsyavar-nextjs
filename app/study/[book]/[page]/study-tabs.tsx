@@ -98,8 +98,8 @@ const StudyTabs = ({ bookId, page }: StudyTabsProps) => {
   const renderTabContent = (tabValue: (typeof TABS)[number]["value"]) => {
     switch (tabValue) {
       case "fehrest":
-        return "<Fehrest />";
-      // return <Fehrest />;
+        // return "<Fehrest />";
+        return <Fehrest />;
       case "book":
         return "<Book />";
       // return <Book />;

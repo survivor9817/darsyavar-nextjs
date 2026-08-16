@@ -1,10 +1,7 @@
 "use client";
+
 import * as React from "react";
-import { getBookById, type BookOption } from "@/app/data/booksData";
 import { cn } from "@/lib/utils";
-import { useBookContext } from "@/app/hooks/BookProvider";
-import { useBookSelectData } from "@/app/hooks/useBookSelectData";
-import ErrorFallback from "./error-fallback";
 import {
   Combobox,
   ComboboxContent,
@@ -13,6 +10,10 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import { useBookParams } from "@/hooks/use-study-params";
+import { useRouter, useSearchParams } from "next/navigation";
+import type { BookOption } from "@/data/booksData";
+import { useBookContext } from "@/app/providers/book-provider";
 
 type BookSelectProps = {
   className?: string;
@@ -20,37 +21,60 @@ type BookSelectProps = {
 };
 
 const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProps) => {
-  const { currentBook, setCurrentBook } = useBookContext();
-  const { options, isLoading, error, loadOptions } = useBookSelectData();
+  const { books, selectedBook } = useBookContext();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { bookId } = useBookParams();
 
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
 
-  const hasValue = Boolean(currentBook?.value);
-  const isFloating = hasValue || open || inputValue.length > 0;
+  React.useEffect(() => {
+    if (open) {
+      setInputValue(selectedBook?.label ?? "");
+    }
+  }, [open, selectedBook?.label]);
 
-  const handleSelect = (value: string | null) => {
+  const filteredBooks = React.useMemo(() => {
+    if (!books) return [];
+    if (!inputValue || inputValue === selectedBook?.label) {
+      return books;
+    }
+    const lowerQuery = inputValue.toLowerCase();
+    return books.filter((book) => book.label.toLowerCase().includes(lowerQuery));
+  }, [books, inputValue, selectedBook?.label]);
+
+  const selectAllText = (inputElement: HTMLInputElement) => {
+    setTimeout(() => {
+      inputElement.select();
+    }, 50);
+  };
+
+  const handleSelect = (value: BookOption | null) => {
     if (!value) return;
 
-    const selected = options?.find((opt) => opt.value === value);
-    if (selected) {
-      setCurrentBook(getBookById(selected.value));
+    if (value.value !== bookId) {
+      const tab = searchParams.get("tab") ?? "book";
+      router.push(`/study/${value.value}/1?tab=${tab}`);
     }
+
     setOpen(false);
-    setInputValue("");
   };
+
+  const hasValue = Boolean(selectedBook);
+  const isFloating = hasValue || open || inputValue.length > 0;
 
   return (
     <div className={cn("relative mt-10 w-73", className)}>
       <Combobox
+        items={filteredBooks}
+        value={selectedBook} // 👈 اضافه شد: تنظیم مقدار انتخاب‌شده برای تشخیص تیک
+        isItemEqualToValue={(item, value) => item?.value === value?.value} // ← به‌جای by
         open={open}
         onOpenChange={setOpen}
-        value={currentBook?.value ?? ""}
         onValueChange={handleSelect}
-        inputValue={inputValue}
-        onInputValueChange={setInputValue} // ← اینجا
+        autoHighlight
       >
-        {/* Floating Label */}
         <label
           className={cn(
             "pointer-events-none absolute right-3 z-10 origin-right px-1 transition-all duration-200 ease-out",
@@ -58,46 +82,42 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
             isFloating
               ? "-top-2.5 text-xs scale-90"
               : "top-1/2 -translate-y-1/2 text-base scale-100",
-            isLoading && "opacity-50",
           )}
         >
           {label}
         </label>
 
         <ComboboxInput
-          placeholder={isLoading ? "در حال بارگذاری کتاب‌ها..." : ""}
-          disabled={isLoading}
+          value={open ? inputValue : (selectedBook?.label ?? "")}
+          onFocus={(e) => selectAllText(e.target)}
+          onClick={(e) => selectAllText(e.target as HTMLInputElement)}
+          onChange={(e) => {
+            if (!open) setOpen(true);
+            setInputValue(e.target.value);
+          }}
+          placeholder=""
           className={cn(
-            "h-[46px] w-full rounded-lg border-2 border-[rgb(200,200,200)] bg-[#ebebeb]",
-            "px-3 text-center text-base font-black",
+            "h-11.5 w-full rounded-lg border-2 border-[rgb(200,200,200)] bg-[#ebebeb]",
+            "px-3 text-center text-base font-black cursor-pointer",
             "focus-visible:ring-0 focus-visible:ring-offset-0",
-            isLoading && "cursor-wait opacity-70",
           )}
         />
 
         <ComboboxContent className="w-(--anchor-width) p-0" dir="rtl">
           <ComboboxList>
-            {error ? (
-              <div className="p-3">
-                <ErrorFallback onRefetch={() => loadOptions()} />
-              </div>
-            ) : (
-              <>
-                <ComboboxEmpty>
-                  {inputValue ? `هیچ کتابی با "${inputValue}" پیدا نشد` : "کتابی موجود نیست"}
-                </ComboboxEmpty>
+            <ComboboxEmpty className="p-2 text-center text-sm font-bold text-gray-500">
+              {inputValue ? `هیچ کتابی با "${inputValue}" پیدا نشد` : "کتابی موجود نیست"}
+            </ComboboxEmpty>
 
-                {options?.map((book) => (
-                  <ComboboxItem
-                    key={book.value}
-                    value={book.value}
-                    className="justify-center font-bold"
-                  >
-                    {book.label}
-                  </ComboboxItem>
-                ))}
-              </>
-            )}
+            {filteredBooks.map((book) => (
+              <ComboboxItem
+                key={book.value}
+                value={book}
+                className="justify-center font-bold cursor-pointer"
+              >
+                {book.label}
+              </ComboboxItem>
+            ))}
           </ComboboxList>
         </ComboboxContent>
       </Combobox>

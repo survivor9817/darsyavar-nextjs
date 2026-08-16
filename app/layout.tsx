@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 
 import localFont from "next/font/local";
+import QueryProvider from "./providers/query-provider";
 
 const materialSymbols = localFont({
   src: "../public/fonts/material-symbols-rounded.woff2",
@@ -46,7 +47,9 @@ export default function RootLayout({
         materialSymbols.variable,
       )}
     >
-      <body>{children}</body>
+      <body>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }

@@ -10,9 +10,7 @@ const Fehrest = (props: Props) => {
         <BookSelect />
       </header>
 
-      <ol className="mt-4">
-        <FehrestList />
-      </ol>
+      <ol className="mt-4">{/* <FehrestList /> */}</ol>
     </div>
   );
 };
