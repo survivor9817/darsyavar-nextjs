@@ -1,6 +1,5 @@
 "use client";
-
-import * as React from "react";
+import { useState, useEffect, useMemo, ChangeEvent, useRef } from "react";
 import { cn } from "@/lib/utils";
 import {
   Combobox,
@@ -26,16 +25,20 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
   const searchParams = useSearchParams();
   const { bookId } = useBookParams();
 
-  const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState("");
+  const [open, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const comboboxInputValue = open ? inputValue : (selectedBook?.label ?? "");
 
-  React.useEffect(() => {
+  const hasValue = Boolean(selectedBook);
+  const isFloating = hasValue || open || inputValue.length > 0;
+
+  useEffect(() => {
     if (open) {
       setInputValue(selectedBook?.label ?? "");
     }
   }, [open, selectedBook?.label]);
 
-  const filteredBooks = React.useMemo(() => {
+  const filteredBooks = useMemo(() => {
     if (!books) return [];
     if (!inputValue || inputValue === selectedBook?.label) {
       return books;
@@ -44,7 +47,7 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
     return books.filter((book) => book.label.toLowerCase().includes(lowerQuery));
   }, [books, inputValue, selectedBook?.label]);
 
-  const onInputChange = (e: BaseUIEvent<React.ChangeEvent<HTMLInputElement, HTMLInputElement>>) => {
+  const onInputChange = (e: BaseUIEvent<ChangeEvent<HTMLInputElement, HTMLInputElement>>) => {
     if (!open) setOpen(true);
     setInputValue(e.target.value);
   };
@@ -62,8 +65,8 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
     setOpen(false);
   };
 
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  React.useEffect(() => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
     if (!inputRef.current) return;
     if (open) {
       const raf1 = requestAnimationFrame(() => {
@@ -73,7 +76,7 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
     }
   }, [open]);
 
-  // React.useEffect(() => {
+  // useEffect(() => {
   //   if (!inputRef.current) return;
   //   if (open) {
   //     const raf1 = requestAnimationFrame(() => {
@@ -86,15 +89,22 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
   //   }
   // }, [open]);
 
-  // React.useEffect(() => {
+  // useEffect(() => {
   //   setInputValue(open ? inputValue : (selectedBook?.label ?? ""));
   // }, [open, selectedBook?.label]);
 
-  const hasValue = Boolean(selectedBook);
-  const isFloating = hasValue || open || inputValue.length > 0;
-
   return (
-    <div className={cn("relative mt-10", className)}>
+    <div
+      className={cn("relative mt-10", className)}
+      onMouseDown={(e) => {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== "INPUT" && inputRef.current) {
+          e.preventDefault();
+          inputRef.current.focus();
+          setOpen(true);
+        }
+      }}
+    >
       <Combobox
         items={filteredBooks}
         value={selectedBook}
@@ -120,7 +130,7 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
         <ComboboxInput
           ref={inputRef}
           // value={inputValue}
-          value={open ? inputValue : (selectedBook?.label ?? "")}
+          value={comboboxInputValue}
           // onFocus={(e) => selectAllText(e.target)}
           // onClick={(e) => selectAllText(e.target as HTMLInputElement)}
           onChange={onInputChange}
