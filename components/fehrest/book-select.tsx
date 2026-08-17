@@ -10,11 +10,10 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
-import { useBookParams } from "@/hooks/use-study-params";
-import { useRouter, useSearchParams } from "next/navigation";
 import type { BookOption } from "@/data/booksData";
 import { useBookContext } from "@/app/providers/book-provider";
 import { BaseUIEvent } from "@base-ui/react";
+import { Label } from "../ui/label";
 
 type BookSelectProps = {
   className?: string;
@@ -23,20 +22,12 @@ type BookSelectProps = {
 
 const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProps) => {
   const { books, selectedBook } = useBookContext();
-  const searchParams = useSearchParams();
-  const { bookId } = useBookParams();
-
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [localValue, setLocalValue] = useState<BookOption | null>(selectedBook);
-
   const comboboxInputValue = open ? inputValue : (localValue?.label ?? "");
-
   const hasValue = Boolean(localValue);
   const isFloating = hasValue || open || inputValue.length > 0;
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Sync localValue with context when it changes externally
   useEffect(() => {
@@ -50,6 +41,7 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
   }, [open, localValue?.label]);
 
   // Select text when opened
+  const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (!inputRef.current) return;
     if (open) {
@@ -62,11 +54,8 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
 
   const filteredBooks = useMemo(() => {
     if (!books) return [];
-    if (!inputValue || inputValue === localValue?.label) {
-      return books;
-    }
-    const lowerQuery = inputValue.toLowerCase();
-    return books.filter((book) => book.label.toLowerCase().includes(lowerQuery));
+    if (!inputValue || inputValue === localValue?.label) return books;
+    return books.filter((book) => book.label.toLowerCase().includes(inputValue.toLowerCase()));
   }, [books, inputValue, localValue?.label]);
 
   const onInputChange = (e: BaseUIEvent<ChangeEvent<HTMLInputElement, HTMLInputElement>>) => {
@@ -74,31 +63,22 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
     setInputValue(e.target.value);
   };
 
-  const router = useRouter();
-  const changeBook = (newBookId: string) => {
-    const query = searchParams.toString();
-    router.push(`/study/${newBookId}/1${query ? `?${query}` : ""}`);
-  };
-
+  const { changeBook } = useBookContext();
   const handleSelect = (newSelectedBook: BookOption | null) => {
     if (!newSelectedBook) return;
-
-    // اول state محلی را به‌روز کن (سریع)
     setLocalValue(newSelectedBook);
-
     const newBookId = newSelectedBook.value;
-    if (newBookId !== bookId) changeBook(newBookId);
+    if (newBookId !== selectedBook?.value) changeBook(newBookId);
     setOpen(false);
     setInputValue("");
   };
 
   return (
     <div
-      className={cn("relative mt-10 ", className)}
+      className={cn("relative mt-10 w-full max-w-80", className)}
       onMouseDown={(e) => {
         const target = e.target as HTMLElement;
-        // اگر روی input یا trigger کلیک شده، کاری نکن
-        if (target.tagName === "INPUT" || triggerRef.current?.contains(target)) {
+        if (target.tagName === "INPUT") {
           return;
         }
         if (inputRef.current) {
@@ -117,23 +97,25 @@ const BookSelect = ({ className, label = "فهرست کتاب" }: BookSelectProp
         onValueChange={handleSelect}
         autoHighlight
       >
-        <label
+        <Label
           className={cn(
-            "pointer-events-none absolute z-10 px-2 transition-all duration-200 ease-out",
-            "bg-[#ebebeb] font-bold",
+            "pointer-events-none absolute z-10 px-2 ", // must be fixed by using useId
+            "top-0 right-4 transition-transform duration-200 ease-out",
+            "font-bold",
             isFloating
-              ? "-top-2 text-xs scale-90 bg-background"
-              : "top-1/2 -translate-y-1/2 text-base scale-100",
+              ? "-translate-y-2 text-xs scale-90 bg-background"
+              : "translate-y-3 text-base scale-100",
           )}
         >
           {label}
-        </label>
+        </Label>
 
         <ComboboxInput
           ref={inputRef}
           value={comboboxInputValue}
           onChange={onInputChange}
-          placeholder="کتابی که می‌خوای رو انتخاب کن."
+          // placeholder={!isFloating ? "کتابی که می‌خوای رو انتخاب کن." : ""}
+          placeholder={isFloating ? "انتخاب کنید." : ""}
           className={cn(
             "h-11.5 w-full border-2 border-[rgb(200,200,200)] bg-background",
             "px-3 text-center text-base font-black cursor-pointer",

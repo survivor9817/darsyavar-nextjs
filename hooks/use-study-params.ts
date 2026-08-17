@@ -9,5 +9,5 @@ type BookParams = {
 
 export function useBookParams() {
   const params = useParams<BookParams>();
-  return { bookId: params.book, page: params.page }; // ← از params.book می‌خونه، نه params.bookId
+  return { bookId: params.book, page: params.page };
 }

@@ -1,15 +1,19 @@
-// src/context/BookContext.tsx
 "use client";
 
-import { BookOption } from "@/data/booksData";
+import { Book, BookOption } from "@/data/booksData";
+import { FehrestSection } from "@/data/fehrestsData";
+import { useBookNavigation } from "@/hooks/use-book-navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
-type BookParams = {
+type BookNavigation = ReturnType<typeof useBookNavigation>;
+
+export type BookContextType = {
   books: BookOption[];
   selectedBook: BookOption | null;
-};
-
-type BookContextType = BookParams;
+  page: string;
+  bookInfo: Book;
+  currentFehrest: FehrestSection[] | null;
+} & BookNavigation;
 
 const BookContext = createContext<BookContextType | null>(null);
 
@@ -19,11 +23,23 @@ export const useBookContext = (): BookContextType => {
   return ctx;
 };
 
-type Props = {
+type BookProviderProps = {
   children: ReactNode;
-  value: BookParams;
+  value: Omit<BookContextType, keyof BookNavigation>;
 };
 
-export const BookProvider = ({ children, value }: Props) => {
-  return <BookContext.Provider value={value}>{children}</BookContext.Provider>;
+export const BookProvider = ({ children, value }: BookProviderProps) => {
+  const { changeBook, changePage, goToNextPage, goToPrevPage, createTocUrl } = useBookNavigation(
+    value.bookInfo.lastPage,
+  );
+  const contextValue = {
+    ...value,
+    changeBook,
+    changePage,
+    goToNextPage,
+    goToPrevPage,
+    createTocUrl,
+  };
+
+  return <BookContext.Provider value={contextValue}>{children}</BookContext.Provider>;
 };

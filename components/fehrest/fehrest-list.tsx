@@ -1,33 +1,41 @@
 "use client";
-import ErrorFallback from "./error-fallback";
-import { useBookContext } from "@/app/hooks/BookProvider";
-import FehrestListSkeleton from "./fehrest-list-skeleton";
-import { useFehrestListData } from "@/app/hooks/useFehrestListData";
-import { collectSectionPages, findSectionPage } from "@/app/hooks/useFehrestItem";
 import FehrestItem from "./fehrest-item";
+import { FehrestSection } from "@/data/fehrestsData";
+import { useBookContext } from "@/app/providers/book-provider";
+import ErrorFallback from "../error-fallback";
+
+export const collectSectionPages = (fehrest: FehrestSection[]): number[] => {
+  return fehrest.flatMap((s) => {
+    const subsectionPages = s.sections ? collectSectionPages(s.sections) : [];
+    return [s.page, ...subsectionPages];
+  });
+};
+
+export const findSectionPage = (targetPage: number, sectionPages: number[]): number => {
+  const smallerNumbers = sectionPages.filter((p) => p <= targetPage);
+  const largestNumber = Math.max(...smallerNumbers);
+  return largestNumber;
+};
 
 // type Props = {};
 
 const FehrestList = () => {
-  const { currentPage, currentBook } = useBookContext();
-  const { currentFehrest, isLoading, error, loadFehrest } = useFehrestListData();
+  const { bookInfo, page, currentFehrest } = useBookContext();
 
-  if (isLoading) return <FehrestListSkeleton />;
-
-  if (error) {
-    if (!currentBook) return <p className="text-center">کتابی را انتخاب کنید.</p>;
-    return <ErrorFallback onRefetch={loadFehrest} ErrorMsg="خطا در بارگذاری فهرست" />;
+  if (!currentFehrest) {
+    if (!bookInfo) return <p className="text-center">کتابی را انتخاب کنید.</p>;
+    return <ErrorFallback onRefetch={() => {}} ErrorMsg="خطا در بارگذاری فهرست" />;
   }
 
-  if (!currentPage) return <p className="text-center">هنوز صفحه ای انتخاب نشده است.</p>;
+  if (!page) return <p className="text-center">هنوز صفحه ای انتخاب نشده است.</p>;
 
   if (!currentFehrest) return <p className="text-center">فهرست موجود نیست.</p>;
 
   const titlePages = collectSectionPages(currentFehrest);
-  const currentSectionPage = findSectionPage(currentPage, titlePages);
+  const currentSectionPage = findSectionPage(+page, titlePages);
 
   return (
-    <>
+    <ol className="mt-4 w-full max-w-80 min-w-0 wrap-break-word overflow-hidden">
       {currentFehrest &&
         currentFehrest.map((section) => (
           <FehrestItem
@@ -36,7 +44,7 @@ const FehrestList = () => {
             currentSectionPage={currentSectionPage}
           />
         ))}
-    </>
+    </ol>
   );
 };
 

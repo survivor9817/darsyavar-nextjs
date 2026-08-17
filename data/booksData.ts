@@ -3127,6 +3127,10 @@ export type BooksFilter = {
   isAvailable?: boolean;
 };
 
+export const isValidBookId = (id: string) => {
+  return getAllBooks().some((b) => b.value === id);
+};
+
 export const getBooks = (filter: BooksFilter = {}): Book[] => {
   const { gradeId, fieldId, isAvailable } = filter;
 

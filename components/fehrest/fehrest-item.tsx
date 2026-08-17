@@ -1,19 +1,29 @@
 "use client";
-import { useFehrestItem } from "@/app/hooks/useFehrestItem";
-import { FehrestSection } from "@/app/data/fehrestsData";
 import { toFaDigits } from "@/lib/toFaDigits";
-import { useBookContext } from "@/app/hooks/BookProvider";
+import { useBookContext } from "@/app/providers/book-provider";
+import { FehrestSection } from "@/data/fehrestsData";
+import Link from "next/link";
+import { useState } from "react";
 
 type Props = {
   section: FehrestSection;
   currentSectionPage: number;
 };
 
+export const checkActive = (currentSectionPage: number, section: FehrestSection): boolean => {
+  if (currentSectionPage === section.page) return true;
+  return !!section.sections?.some((subsection) => {
+    return checkActive(currentSectionPage, subsection);
+  });
+};
+
 const FehrestItem = ({ section, currentSectionPage }: Props) => {
-  const { goToPage } = useBookContext();
-  const { isActive, handleClick } = useFehrestItem(currentSectionPage, section, goToPage);
-  const isExpanded = isActive ? "max-h-screen" : "max-h-0";
-  const isHighlighted = isActive ? "bg-[#e1a3c1]" : "hover:bg-[#e1a3c175]";
+  const { changePage, createTocUrl } = useBookContext();
+  const isActive = checkActive(currentSectionPage, section);
+  const [isOpen, setIsOpen] = useState(isActive);
+
+  const isExpanded = isOpen ? "max-h-screen" : "max-h-0";
+  const isHighlighted = isOpen ? "bg-[#e1a3c1]" : "hover:bg-[#e1a3c175]";
 
   const subitems = section.sections && section.sections?.length > 0 && (
     <ol
@@ -32,16 +42,19 @@ const FehrestItem = ({ section, currentSectionPage }: Props) => {
   );
 
   return (
-    <li>
-      <div
-        className={`flex justify-between font-semibold py-1.25 px-2 pl-1 my-1 rounded cursor-pointer transition-colors duration-300 ${isHighlighted}`}
-        onClick={handleClick}
-      >
-        <span className="h-full w-full my-auto text-sm truncate">{section.title}</span>
-        <span className="flex justify-center w-7 h-full p-1 border-2 rounded text-xs">
-          {toFaDigits(section.page)}
-        </span>
-      </div>
+    <li className="">
+      <Link href={createTocUrl(section.page) as string}>
+        <div
+          className={`flex justify-between font-semibold py-1.25 px-2 pl-1 my-1 rounded cursor-pointer transition-colors duration-300 ${isHighlighted}`}
+          // onClick={() => changePage(section.page)}
+          onClick={() => setIsOpen(true)}
+        >
+          <span className="h-full w-full my-auto text-sm">{section.title}</span>
+          <span className="flex justify-center w-7 h-full p-1 border-2 rounded text-xs">
+            {toFaDigits(section.page)}
+          </span>
+        </div>
+      </Link>
 
       {subitems}
     </li>
